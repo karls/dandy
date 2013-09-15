@@ -4,6 +4,24 @@
            [dandy.spec-helper :refer :all])
   (import java.awt.image.BufferedImage))
 
+(describe "image-layout"
+          (context "small landscape image"
+                   (let [image (BufferedImage. 1000 500 5)]
+                     (it "is small enough"
+                         (should= :small-enough (image-layout image)))))
+          (context "small portrait image"
+                   (let [image (BufferedImage. 500 1000 5)]
+                     (it "is small enough"
+                         (should= :small-enough (image-layout image)))))
+          (context "large landscape image"
+                   (let [image (BufferedImage. 1001 800 5)]
+                     (it "is going to scale it"
+                         (should= :scale-landscape (image-layout image)))))
+          (context "large portrait image"
+                   (let [image (BufferedImage. 800 1001 5)]
+                     (it "is going to scale it"
+                         (should= :scale-portrait (image-layout image))))))
+
 (describe "resize"
           (context "when landscape image is <= 1000px wide"
                    (let [small-image (BufferedImage. 999 666 5)
@@ -30,33 +48,3 @@
                          resized-image (resize large-image)]
                      (it "resizes the image"
                          (should= 1000 (.getHeight resized-image))))))
-
-(describe "image-layout"
-          (context "small landscape image"
-                   (let [image (BufferedImage. 1000 500 5)]
-                     (it "is small enough"
-                         (should= :small-enough (image-layout image)))))
-          (context "small portrait image"
-                   (let [image (BufferedImage. 500 1000 5)]
-                     (it "is small enough"
-                         (should= :small-enough (image-layout image)))))
-          (context "large landscape image"
-                   (let [image (BufferedImage. 1001 800 5)]
-                     (it "is going to scale it"
-                         (should= :scale-landscape (image-layout image)))))
-          (context "large portrait image"
-                   (let [image (BufferedImage. 800 1001 5)]
-                     (it "is going to scale it"
-                         (should= :scale-portrait (image-layout image))))))
-
-(describe "path->image"
-          (context "normal image file"
-                   (it "returns an instance of BufferedImage"
-                       (should (instance? BufferedImage 
-                                          (path->image (images "mountains.jpg"))))))
-          (context "non-existent file"
-                   (it "throws an exception"
-                       (should-throw (path->image (images "non-existent.jpg")))))
-          (context "invalid image file"
-                   (it "throws an exception"
-                       (should-throw (path->image (images "not-an-image.txt"))))))

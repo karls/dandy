@@ -1,14 +1,5 @@
 (ns dandy.resize
-  (require [clojure.java.io :as io])
-  (require [clojure.string :as str])
-  (import javax.imageio.ImageIO)
   (import java.awt.image.BufferedImage))
-
-(defn sanitise-path [path]
-  (when (.endsWith (str/lower-case path) ".jpg") path))
-
-(defn path->image [path]
-  (-> path sanitise-path io/as-file ImageIO/read))
 
 (defn image-layout [bufimage]
   (let [w (.getWidth bufimage)
