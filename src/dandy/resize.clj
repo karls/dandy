@@ -13,7 +13,7 @@
 
 (defmethod resize :small-enough [original-image] original-image)
 
-(defmethod resize :scale-landscape [original-image]
+(defmethod resize :scale-landscape [original-image] 
   (let [ratio (/ (.getWidth original-image) 1000)
         new-width 1000
         new-height (int (/ (.getHeight original-image) ratio))
