@@ -8,19 +8,23 @@
           (context "small landscape image"
                    (let [image (BufferedImage. 1000 500 5)]
                      (it "is small enough"
-                         (should= :small-enough (image-layout image)))))
+                         (should= false (scale? image)))))
           (context "small portrait image"
                    (let [image (BufferedImage. 500 1000 5)]
                      (it "is small enough"
-                         (should= :small-enough (image-layout image)))))
+                         (should= false (scale? image)))))
           (context "large landscape image"
                    (let [image (BufferedImage. 1001 800 5)]
                      (it "is going to scale it"
-                         (should= :scale-landscape (image-layout image)))))
+                         (should= true (scale? image)))))
           (context "large portrait image"
-                   (let [image (BufferedImage. 800 1001 5)]
+                   (let [image (BufferedImage. 1001 1500 5)]
                      (it "is going to scale it"
-                         (should= :scale-portrait (image-layout image))))))
+                         (should= true (scale? image)))))
+          (context "tricky case"
+                   (let [image (BufferedImage. 800 1001 5)]
+                     (it "is small enough"
+                         (should= false (scale? image))))))
 
 (describe "resize"
           (context "when landscape image is <= 1000px wide"
@@ -47,4 +51,9 @@
                    (let [large-image (BufferedImage. 2000 3000 5)
                          resized-image (resize large-image)]
                      (it "resizes the image"
-                         (should= 1000 (.getHeight resized-image))))))
+                         (should= 1000 (.getWidth resized-image)))))
+          (context "when portrait image is < 1000px wide but > 1000px tall"
+                   (let [large-image (BufferedImage. 700 3000 5)
+                         resized-image (resize large-image)]
+                     (it "does not resize the image"
+                         (should= 700 (.getWidth resized-image))))))
