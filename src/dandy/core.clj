@@ -1,6 +1,6 @@
 (ns dandy.core
   (:gen-class))
-(require '[dandy.resize :as imageutil])
+(require '[dandy.gui :as gui])
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -8,4 +8,4 @@
   ;; work around dangerous default behaviour in Clojure
   (alter-var-root #'*read-eval* (constantly false))
 
-  (println args))
+  (gui/run))
