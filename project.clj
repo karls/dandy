@@ -8,4 +8,5 @@
   :profiles {:dev {:dependencies [[speclj "2.7.5"]]}}
   :plugins [[speclj "2.7.5"]]
   :test-paths ["spec/"]
+  :jvm-opts ["-Xdock:name=Dandy"]
   :main dandy.core)
