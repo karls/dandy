@@ -1,12 +1,7 @@
 (ns dandy.gui
   (require [seesaw.core :as s]
-           [seesaw.pref :as pref]
+           [dandy.prefs :as prefs]
            [seesaw.chooser :as chooser]))
-
-(def prefs (pref/preference-atom "prefs" {}))
-;; (println @prefs)
-;; (reset! prefs {:hello "world"})
-;; (println @prefs)
 
 (defmulti build-menuitems-for (fn [x] x))
 (defmethod build-menuitems-for :file [_]
@@ -15,9 +10,11 @@
                                    (chooser/choose-file :type :open
                                                         :multi? true
                                                         :filters [["Images" ["png" "jpg" "jpeg"]]]
-                                                        :selection-mode :files-only))])])
+                                                        :selection-mode :files-only
+                                                        :dir (get @prefs/prefs :dir)))])])
 (defmethod build-menuitems-for :edit [_]
-  [(s/menu-item :text "Preferences")])
+  [(s/menu-item :text "Preferences"
+                :listen [:action (fn [_] (prefs/make-prefs-dialog))])])
 
 (defmulti build-menu-for (fn [x] x))
 (defmethod build-menu-for :file [_]
@@ -31,7 +28,7 @@
 
 (defn run []
   (s/native!)
-  (def f (s/frame :title "Dandy" :menubar (build-menubar)))
+  (def f (s/frame :title "Dandy" :menubar (build-menubar) :on-close :exit))
   (def layout (s/grid-panel :rows 2 :columns 1))
   (def buttons
     (let [group (s/button-group)]
