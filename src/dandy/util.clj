@@ -3,9 +3,12 @@
   (require [clojure.string :as str])
   (import javax.imageio.ImageIO))
 
-; TODO: add more extensions!
 (defn sanitise-path [path]
-  (when (.endsWith (str/lower-case path) ".jpg") path))
+  (when
+      (some
+       (fn [ext]
+         (.endsWith (str/lower-case path) ext))
+       [".png" ".jpg" ".jpeg"])))
 
 (defn path->image [path]
   (-> path sanitise-path io/as-file ImageIO/read))

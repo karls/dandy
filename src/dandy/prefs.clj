@@ -27,7 +27,7 @@
                                             :dir (get @prefs :dir)
                                             :success-fn dir-chosen))]))
 (def new-logo-label
-  (s/label :text "'New logo' image"))
+  (s/label :text "'Logo' image"))
 
 (def new-logo-text-field
   (s/text :text (get @prefs :new-logo)
