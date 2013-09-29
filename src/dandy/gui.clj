@@ -138,7 +138,11 @@
 (defn run []
   (s/native!)
 
-  (def f (s/frame :title "Dandy" :menubar (build-menubar) :on-close :exit :resizable? false))
+  (def f (s/frame :title "Dandy"
+                  :menubar (build-menubar)
+                  :on-close :exit
+                  :resizable? false
+                  :icon (seesaw.icon/icon (io/file "dandy.png"))))
 
   (s/config! f :content layout)
   (-> f s/pack! s/show!))
