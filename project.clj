@@ -9,5 +9,6 @@
   :profiles {:dev {:dependencies [[speclj "2.7.5"]]}}
   :plugins [[speclj "2.7.5"]]
   :test-paths ["spec/"]
+  :java-source-paths ["src/java"]
   :jvm-opts ["-Xdock:name=Dandy"]
   :main dandy.core)
