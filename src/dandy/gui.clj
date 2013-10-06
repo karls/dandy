@@ -8,7 +8,7 @@
            [clojure.java.io :as io])
   (use [seesaw.chooser :only (choose-file)]
        [seesaw.mig :only (mig-panel)])
-  (import javax.imageio.ImageIO))
+  (import [javax.imageio ImageIO ImageWriteParam IIOImage]))
 
 (def files (atom []))
 (def done-count (atom 0))
@@ -58,8 +58,19 @@
                basename (clojure.string/join "." (drop-last name-parts))
                resized (-> image resize)
                layered (reduce (fn [i lp] (apply-layer i (first lp) (last lp))) resized (map vector layers positions))
-               output-file (io/file (generate-filename directory basename ext))]
-           (ImageIO/write layered ext output-file)
+               output-file (io/file (generate-filename directory basename ext))
+               writer (.next (ImageIO/getImageWritersByFormatName ext))
+               write-param (.getDefaultWriteParam writer)
+               iioimage (IIOImage. layered nil nil)
+               ios (ImageIO/createImageOutputStream output-file)]
+           (doto write-param
+             (.setCompressionMode ImageWriteParam/MODE_EXPLICIT)
+             (.setCompressionQuality 1.0))
+           (doto writer
+             (.setOutput ios)
+             (.write nil iioimage, write-param)
+             (.dispose))
+           ;; (ImageIO/write layered ext output-file)
            (>! done-chan (str "Converting file " (.getPath output-file))))))
 
       (<!!
@@ -80,7 +91,7 @@
 (defn open-file-dialog []
   (choose-file :type :open
                :multi? true
-               :filters [["Images" ["png" "jpg" "jpeg"]]]
+               :filters [["Images" (seq (ImageIO/getReaderFormatNames))]]
                :selection-mode :files-only
                :dir (get @prefs/prefs :dir)
                :success-fn files-selected))
@@ -102,7 +113,7 @@
              :items [[(s/button :text "Choose files"
                                 :listen [:action (fn [e] (open-file-dialog))]) ""]
                      [status-text "skip 1, span 2, wrap"]
-                     
+
                      [(nth layer-cbs 0) "span 2 2"]
                      [(s/radio :text "Top left" :id :top-left
                                :group (:new-logo placement-map)) ""]
@@ -132,7 +143,7 @@
                                :group (:new placement-map)) "skip 1"]
                      [(s/radio :text "Bottom right" :id :bottom-right
                                :group (:new placement-map)) "wrap 20px"]
-                     
+
                      [convert-button "skip 3"]]))
 
 (defn run []
