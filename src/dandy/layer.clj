@@ -23,6 +23,8 @@
     (doto graphics
       (.setRenderingHint RenderingHints/KEY_RENDERING
                          RenderingHints/VALUE_RENDER_QUALITY)
+      (.setRenderingHint RenderingHints/KEY_COLOR_RENDERING
+                         RenderingHints/VALUE_COLOR_RENDER_QUALITY)
       (.drawImage layer (first coords) (second coords) nil)
       (.dispose))
     base))
