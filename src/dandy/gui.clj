@@ -153,7 +153,7 @@
                   :menubar (build-menubar)
                   :on-close :exit
                   :resizable? false
-                  :icon (seesaw.icon/icon (io/file "dandy.png"))))
+                  :icon (seesaw.icon/icon (io/file "assets/dandy.png"))))
 
   (s/config! f :content layout)
   (-> f s/pack! s/show!))
