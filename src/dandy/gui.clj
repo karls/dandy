@@ -1,5 +1,6 @@
 (ns dandy.gui
   (require [seesaw.core :as s]
+           [seesaw.dnd :as dnd]
            [dandy.prefs :as prefs]
            [dandy.util :as util]
            [dandy.resize :refer (resize)]
@@ -41,9 +42,7 @@
 
 (defn convert-files [e]
   (reset! done-count 0)
-  (println (filter (fn [cb] (s/config cb :selected?)) layer-cbs))
-  (println (get-selected-layers))
-  (when (not (empty @files))
+  (when (seq @files) ; recommended idiom for (not (empty? coll))
     (let [done-chan (chan)
           layers (map (fn [id] (load-layer id)) (get-user-data-for-layers))
           positions (map (fn [p] (-> p s/selection (s/config :id)))
@@ -68,17 +67,18 @@
              (.setCompressionQuality 1.0))
            (doto writer
              (.setOutput ios)
-             (.write nil iioimage, write-param)
+             (.write nil iioimage write-param)
              (.dispose))
+           (doto ios
+             (.close))
            ;; (ImageIO/write layered ext output-file)
            (>! done-chan (str "Converting file " (.getPath output-file))))))
 
       (<!!
        (go
         (doseq [_ @files]
-          (println (<! done-chan))
-          (swap! done-count inc)
-          (println @done-count))))
+          (swap! done-count inc))))
+      (reset! files []) ; reset files list
       (s/config! status-text :text (str @done-count " files converted!")))))
 
 (def convert-button (s/button :text "Convert"
@@ -87,6 +87,15 @@
 (defn files-selected [fc, fs]
   (s/text! status-text (str (count fs) " files ready to be converted"))
   (reset! files fs))
+
+(defn dnd-handler-fn [data]
+  (let [files (map (fn [path] io/file path) (:data data))]
+    (files-selected nil files)))
+
+(def dnd-handler (dnd/default-transfer-handler
+                   :import [dnd/file-list-flavor dnd-handler-fn]
+                   :export {}))
+
 
 (defn open-file-dialog []
   (choose-file :type :open
@@ -153,7 +162,8 @@
                   :menubar (build-menubar)
                   :on-close :exit
                   :resizable? false
-                  :icon (seesaw.icon/icon (io/file "assets/dandy.png"))))
+                  :icon (seesaw.icon/icon (io/file "assets/dandy.png"))
+                  :transfer-handler dnd-handler))
 
   (s/config! f :content layout)
-  (-> f s/pack! s/show!))
+  (s/invoke-later (-> f s/pack! s/show!)))
