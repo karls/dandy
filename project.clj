@@ -1,6 +1,6 @@
-(defproject dandy "0.1.0-SNAPSHOT"
+(defproject dandy "0.3.0"
   :description "Watermarking tool"
-  :url "http://example.com/FIXME"
+  :url "https://github.com/karls/dandy"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
@@ -10,6 +10,7 @@
   :plugins [[speclj "2.7.5"]]
   :test-paths ["spec/"]
   :java-source-paths ["src/java"]
-  :resource-paths ["assets"]
-  :jvm-opts ["-Xdock:name=Dandy" "-Xdock:icon=assets/dandy.png"]
-  :main dandy.core)
+  ;; :resource-paths ["assets"]
+  :jvm-opts ["-Xdock:name=Dandy" "-Xdock:icon=assets/dandy-icon.png"]
+  :main dandy.core
+  :aot :all)
