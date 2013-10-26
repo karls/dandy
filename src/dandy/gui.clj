@@ -9,6 +9,7 @@
            [clojure.java.io :as io])
   (use [seesaw.chooser :only (choose-file)]
        [seesaw.mig :only (mig-panel)])
+  ;(import org.pushingpixels.substance.api.SubstanceLookAndFeel)
   (import [javax.imageio ImageIO ImageWriteParam IIOImage]))
 
 (def files (atom []))
@@ -81,8 +82,8 @@
       (reset! files []) ; reset files list
       (s/config! status-text :text (str @done-count " files converted!")))))
 
-(def convert-button (s/button :text "Convert"
-                              :listen [:action convert-files]))
+(defn convert-button []
+  (s/button :text "Convert" :listen [:action convert-files]))
 
 (defn files-selected [fc, fs]
   (s/text! status-text (str (count fs) " files ready to be converted"))
@@ -117,7 +118,7 @@
 (defn build-menubar []
   (s/menubar :items [(build-menu-for :edit)]))
 
-(def layout
+(defn layout []
   (mig-panel :constraints ["gap 5px, ins 5px" "" ""]
              :items [[(s/button :text "Choose files"
                                 :listen [:action (fn [e] (open-file-dialog))]) ""]
@@ -153,17 +154,21 @@
                      [(s/radio :text "Bottom right" :id :bottom-right
                                :group (:new placement-map)) "wrap 20px"]
 
-                     [convert-button "skip 3"]]))
+                     [(convert-button) "skip 3"]]))
 
 (defn run []
-  (s/native!)
-
-  (def f (s/frame :title "Dandy"
-                  :menubar (build-menubar)
-                  :on-close :exit
-                  :resizable? false
-                  :icon (seesaw.icon/icon (io/file "assets/dandy.png"))
-                  :transfer-handler dnd-handler))
-
-  (s/config! f :content layout)
-  (s/invoke-later (-> f s/pack! s/show!)))
+  ;; (s/invoke-later
+  ;;  (-> (get (SubstanceLookAndFeel/getAllSkins) "Office Silver 2007")
+  ;;      .getClassName
+  ;;      SubstanceLookAndFeel/setSkin))
+  (s/invoke-later
+   (-> (s/frame
+        :title "Dandy"
+        :content (layout)
+        :menubar (build-menubar)
+        :on-close :exit
+        :resizable? false
+        :icon (seesaw.icon/icon (io/file "assets/dandy.png"))
+        :transfer-handler dnd-handler)
+       s/pack!
+       s/show!)))
