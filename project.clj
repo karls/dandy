@@ -11,7 +11,7 @@
   :plugins [[speclj "2.7.5"]]
   :test-paths ["spec/"]
   :java-source-paths ["src/java"]
-  ;; :resource-paths ["assets"]
+  :resource-paths ["assets"]
   :jvm-opts ["-Xdock:name=Dandy" "-Xdock:icon=assets/dandy-icon.png"]
   :main dandy.core
   :aot :all)
