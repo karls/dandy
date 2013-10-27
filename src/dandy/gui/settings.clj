@@ -1,14 +1,12 @@
-(ns dandy.gui.prefs
+(ns dandy.gui.settings
   (require [seesaw.core :as s]
-           [seesaw.pref :as prefs]
            [seesaw.bind :as bind]
            [dandy.gui.behaviour :as behaviour])
   (use [seesaw.chooser :only (choose-file)]
-       [seesaw.mig :only (mig-panel)])
+       [seesaw.mig :only (mig-panel)]
+       [dandy.prefs :only (prefs)])
   (import org.pushingpixels.substance.api.SubstanceLookAndFeel)
   )
-
-(def prefs (prefs/preference-atom "prefs" {}))
 
 (defn directory-label []
   (s/label :text "Choose default directory:"))
@@ -35,7 +33,7 @@
   (s/label :text "Choose icons:"))
 
 (defn icon-list []
-  (s/listbox :id :icons
+  (s/listbox :id :icon-list
              :model (keys (get @prefs :icons))
              :border (seesaw.border/line-border :color :grey)))
 
@@ -60,19 +58,20 @@
 
 (defn icon-remove []
   (s/button :id :icon-remove
+            :enabled? false
             :icon (seesaw.icon/icon "icons/bin.png")))
 
 (defn make-preference-content []
   (let [pgroup (s/button-group)]
-    (mig-panel :constraints ["gap 5px, fill"
-                             "[90px]10px[:64px:64px][240px:][]"
+    (mig-panel :constraints ["gap 10px, fill"
+                             "[90px]20px[:64px:64px][240px:][]"
                              ""]
                :items [[(s/label :text "Choose default directory:")
                         "align left, wrap, span 4"]
                        [(directory-text-field) "span 3, growx"]
                        [(directory-button) "wrap"]
 
-                       [(s/separator) "span 4, growx, wrap"]
+                       [(s/separator) "span 4, growx, gaptop 15px, gapbottom 15px, wrap"]
 
                        [(s/label :text "Choose icons:")
                         "align left, span 5, wrap"]
@@ -100,7 +99,7 @@
                        [(icon-add) "split 2"]
                        [(icon-remove) ""]])))
 
-(defn make-prefs-dialog []
+(defn make-settings-dialog []
   (s/invoke-later
    (-> (get (SubstanceLookAndFeel/getAllSkins) "Office Silver 2007")
        .getClassName
