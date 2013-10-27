@@ -1,7 +1,7 @@
-(ns dandy.gui
+(ns dandy.gui.main
   (require [seesaw.core :as s]
            [seesaw.dnd :as dnd]
-           [dandy.prefs :as prefs]
+           [dandy.gui.prefs :as prefs]
            [dandy.util :as util]
            [dandy.resize :refer (resize)]
            [dandy.layer :refer (apply-layer)]
@@ -9,7 +9,7 @@
            [clojure.java.io :as io])
   (use [seesaw.chooser :only (choose-file)]
        [seesaw.mig :only (mig-panel)])
-  ;(import org.pushingpixels.substance.api.SubstanceLookAndFeel)
+  (import org.pushingpixels.substance.api.SubstanceLookAndFeel)
   (import [javax.imageio ImageIO ImageWriteParam IIOImage]))
 
 (def files (atom []))
@@ -119,7 +119,7 @@
   (s/menubar :items [(build-menu-for :edit)]))
 
 (defn layout []
-  (mig-panel :constraints ["gap 5px, ins 5px" "" ""]
+  (mig-panel :constraints ["debug, gap 5px, ins 5px" "" ""]
              :items [[(s/button :text "Choose files"
                                 :listen [:action (fn [e] (open-file-dialog))]) ""]
                      [status-text "skip 1, span 2, wrap"]
@@ -157,10 +157,10 @@
                      [(convert-button) "skip 3"]]))
 
 (defn run []
-  ;; (s/invoke-later
-  ;;  (-> (get (SubstanceLookAndFeel/getAllSkins) "Office Silver 2007")
-  ;;      .getClassName
-  ;;      SubstanceLookAndFeel/setSkin))
+  (s/invoke-later
+   (-> (get (SubstanceLookAndFeel/getAllSkins) "Office Silver 2007")
+       .getClassName
+       SubstanceLookAndFeel/setSkin))
   (s/invoke-later
    (-> (s/frame
         :title "Dandy"
