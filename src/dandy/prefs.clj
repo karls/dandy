@@ -1,4 +1,4 @@
 (ns dandy.prefs
-  (require [seesaw.pref :as prefs]))
+  (require [seesaw.pref :as pref]))
 
-(def prefs (prefs/preference-atom "prefs" {}))
+(def prefs (pref/preference-atom "prefs" {}))

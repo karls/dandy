@@ -1,14 +1,15 @@
 (ns dandy.gui.main
-  (require [seesaw.core :as s]
+  (require [clojure.core.async :refer :all]
+           [clojure.java.io :as io]
+           [seesaw.core :as s]
            [seesaw.dnd :as dnd]
-           [dandy.gui.prefs :as prefs]
            [dandy.util :as util]
            [dandy.resize :refer (resize)]
            [dandy.layer :refer (apply-layer)]
-           [clojure.core.async :refer :all]
-           [clojure.java.io :as io])
+           [dandy.gui.settings])
   (use [seesaw.chooser :only (choose-file)]
-       [seesaw.mig :only (mig-panel)])
+       [seesaw.mig :only (mig-panel)]
+       [dandy.prefs :only (prefs)])
   (import org.pushingpixels.substance.api.SubstanceLookAndFeel)
   (import [javax.imageio ImageIO ImageWriteParam IIOImage]))
 
@@ -35,7 +36,7 @@
   (map placement-map ids))
 
 (defn load-layer [id]
-  (ImageIO/read (io/file (get @prefs/prefs id))))
+  (ImageIO/read (io/file (get @prefs id))))
 
 (defn generate-filename [directory basename ext]
   (let [pos-ext (apply str (map (fn [p] (str "_" (name p))) (get-user-data-for-layers)))]
@@ -103,13 +104,14 @@
                :multi? true
                :filters [["Images" (seq (ImageIO/getReaderFormatNames))]]
                :selection-mode :files-only
-               :dir (get @prefs/prefs :dir)
+               :dir (get @prefs :dir)
                :success-fn files-selected))
 
 (defmulti build-menuitems-for (fn [x] x))
 (defmethod build-menuitems-for :edit [_]
   [(s/menu-item :text "Preferences"
-                :listen [:action (fn [_] (prefs/make-prefs-dialog))])])
+                :listen [:action (fn [_]
+                                   (dandy.gui.settings/make-settings-dialog))])])
 
 (defmulti build-menu-for (fn [x] x))
 (defmethod build-menu-for :edit [_]
@@ -119,7 +121,7 @@
   (s/menubar :items [(build-menu-for :edit)]))
 
 (defn layout []
-  (mig-panel :constraints ["debug, gap 5px, ins 5px" "" ""]
+  (mig-panel :constraints ["gap 5px, ins 5px" "" ""]
              :items [[(s/button :text "Choose files"
                                 :listen [:action (fn [e] (open-file-dialog))]) ""]
                      [status-text "skip 1, span 2, wrap"]
