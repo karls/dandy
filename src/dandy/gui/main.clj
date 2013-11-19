@@ -1,17 +1,17 @@
 (ns dandy.gui.main
-  (require [clojure.core.async :refer :all]
-           [clojure.java.io :as io]
-           [seesaw.core :as s]
-           [seesaw.dnd :as dnd]
-           [dandy.util :as util]
-           [dandy.resize :refer (resize)]
-           [dandy.layer :refer (apply-layer)]
-           [dandy.gui.settings])
-  (use [seesaw.chooser :only (choose-file)]
-       [seesaw.mig :only (mig-panel)]
-       [dandy.prefs :only (prefs)])
-  (import org.pushingpixels.substance.api.SubstanceLookAndFeel)
-  (import [javax.imageio ImageIO ImageWriteParam IIOImage]))
+  (:require [clojure.core.async :refer :all]
+            [clojure.java.io :as io]
+            [seesaw.core :as s]
+            [seesaw.dnd :as dnd]
+            [dandy.util :as util]
+            [dandy.resize :refer (resize)]
+            [dandy.layer :refer (apply-layer)]
+            [dandy.gui.settings])
+  (:use [seesaw.chooser :only (choose-file)]
+        [seesaw.mig :only (mig-panel)]
+        [dandy.prefs :only (prefs)])
+  (:import org.pushingpixels.substance.api.SubstanceLookAndFeel)
+  (:import [javax.imageio ImageIO ImageWriteParam IIOImage]))
 
 (def files (atom []))
 (def done-count (atom 0))

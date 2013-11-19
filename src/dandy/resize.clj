@@ -1,7 +1,7 @@
 (ns dandy.resize
-  (import java.awt.image.BufferedImage)
-  (import java.awt.RenderingHints)
-  (import dandy.ResizeUtils))
+  (:import java.awt.image.BufferedImage)
+  (:import java.awt.RenderingHints)
+  (:import dandy.ResizeUtils))
 
 (defn scale? [bufimage]
   (let [w (.getWidth bufimage)

@@ -1,6 +1,6 @@
 (ns dandy.core
   (:gen-class)
-  (require [dandy.gui.main :as gui]))
+  (:require [dandy.gui.main :as gui]))
 
 (defn -main
   [& args]

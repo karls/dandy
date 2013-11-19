@@ -1,7 +1,7 @@
 (ns dandy.util
-  (require [clojure.java.io :as io])
-  (require [clojure.string :as str])
-  (import javax.imageio.ImageIO))
+  (:require [clojure.java.io :as io])
+  (:require [clojure.string :as str])
+  (:import javax.imageio.ImageIO))
 
 (def image-exts (seq (ImageIO/getReaderFormatNames)))
 

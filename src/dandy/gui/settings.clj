@@ -1,11 +1,11 @@
 (ns dandy.gui.settings
-  (require [seesaw.core :as s]
-           [seesaw.bind :as bind]
-           [dandy.gui.behaviour :as behaviour])
-  (use [seesaw.chooser :only (choose-file)]
-       [seesaw.mig :only (mig-panel)]
-       [dandy.prefs :only (prefs)])
-  (import org.pushingpixels.substance.api.SubstanceLookAndFeel))
+  (:require [seesaw.core :as s]
+            [seesaw.bind :as bind]
+            [dandy.gui.behaviour :as behaviour])
+  (:use [seesaw.chooser :only (choose-file)]
+        [seesaw.mig :only (mig-panel)]
+        [dandy.prefs :only (prefs)])
+  (:import org.pushingpixels.substance.api.SubstanceLookAndFeel))
 
 (defn directory-label []
   (s/label :text "Choose default directory:"))

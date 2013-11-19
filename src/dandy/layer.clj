@@ -1,5 +1,5 @@
 (ns dandy.layer
-  (import java.awt.RenderingHints))
+  (:import java.awt.RenderingHints))
 
 (defmulti compute-layer-coords (fn [_ _ pos] pos))
 
