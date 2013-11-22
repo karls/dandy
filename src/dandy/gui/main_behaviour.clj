@@ -17,7 +17,7 @@
 (def icon-names (keys icons))
 (def to-show (zipmap icon-names (map #(:show-by-default %1) (vals icons))))
 (def to-position (zipmap icon-names (map #(:position %1) (vals icons))))
-(def pos-groups (zipmap icon-names (map (fn [_] (s/button-group)) (vals icons))))
+(def pos-groups (zipmap icon-names (map (constantly (s/button-group)) (vals icons))))
 
 (def status-text-notifier (bind/notify-later))
 
@@ -117,7 +117,6 @@
             (fn [_] (convert-files root)))
 
   (s/listen (find-elem :#choose-files)
-            :mouse-clicked
-            open-file-dialog)
+            :mouse-clicked open-file-dialog)
 
   root)
