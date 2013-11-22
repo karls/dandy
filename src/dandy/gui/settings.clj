@@ -1,7 +1,7 @@
 (ns dandy.gui.settings
   (:require [seesaw.core :as s]
             [seesaw.bind :as bind]
-            [dandy.gui.behaviour :as behaviour])
+            [dandy.gui.settings-behaviour :as behaviour])
   (:use [seesaw.chooser :only (choose-file)]
         [seesaw.mig :only (mig-panel)]
         [dandy.prefs :only (prefs)])
@@ -102,7 +102,7 @@
                      [(icon-add) "split 2"]
                      [(icon-remove) ""]]))
 
-(defn make-settings-dialog []
+(defn make-settings-dialog [& args]
   (s/invoke-later
    (-> (get (SubstanceLookAndFeel/getAllSkins) "Office Silver 2007")
        .getClassName

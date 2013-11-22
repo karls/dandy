@@ -2,167 +2,76 @@
   (:require [clojure.core.async :refer :all]
             [clojure.java.io :as io]
             [seesaw.core :as s]
-            [seesaw.dnd :as dnd]
             [dandy.util :as util]
-            [dandy.resize :refer (resize)]
-            [dandy.layer :refer (apply-layer)]
+            [dandy.gui.main-behaviour :as behaviour]
             [dandy.gui.settings])
   (:use [seesaw.chooser :only (choose-file)]
         [seesaw.mig :only (mig-panel)]
         [dandy.prefs :only (prefs)])
-  (:import org.pushingpixels.substance.api.SubstanceLookAndFeel)
-  (:import [javax.imageio ImageIO ImageWriteParam IIOImage]))
+  (:import org.pushingpixels.substance.api.SubstanceLookAndFeel))
 
-(def files (atom []))
-(def done-count (atom 0))
-
-(def status-text (s/label :text ""))
-
-(def layer-cbs [(s/checkbox :text "Logo" :user-data :new-logo)
-                (s/checkbox :text "New price" :user-data :new-price)
-                (s/checkbox :text "New" :user-data :new)])
-
-(def placement-map {:new-logo (s/button-group)
-                    :new-price (s/button-group)
-                    :new (s/button-group)})
-
-(defn get-selected-layers []
-  (filter (fn [cb] (s/config cb :selected?)) layer-cbs))
-
-(defn get-user-data-for-layers []
-  (map (fn [cb] (s/config cb :user-data)) (get-selected-layers)))
-
-(defn get-position-groups [ids]
-  (map placement-map ids))
-
-(defn load-layer [id]
-  (ImageIO/read (io/file (get @prefs id))))
-
-(defn generate-filename [directory basename ext]
-  (let [pos-ext (apply str (map (fn [p] (str "_" (name p))) (get-user-data-for-layers)))]
-    (str directory "/" basename "_resized" pos-ext "." ext)))
-
-(defn convert-files [e]
-  (reset! done-count 0)
-  (when (seq @files) ; recommended idiom for (not (empty? coll))
-    (let [done-chan (chan)
-          layers (map (fn [id] (load-layer id)) (get-user-data-for-layers))
-          positions (map (fn [p] (-> p s/selection (s/config :id)))
-                         (get-position-groups (get-user-data-for-layers)))]
-      (doseq [file @files]
-        (go
-         (let [image (ImageIO/read file)
-               filename (.getName file)
-               directory (.getParent file)
-               name-parts (-> filename (clojure.string/split #"\."))
-               ext (last name-parts)
-               basename (clojure.string/join "." (drop-last name-parts))
-               resized (-> image resize)
-               layered (reduce (fn [i lp] (apply-layer i (first lp) (last lp))) resized (map vector layers positions))
-               output-file (io/file (generate-filename directory basename ext))
-               writer (.next (ImageIO/getImageWritersByFormatName ext))
-               write-param (.getDefaultWriteParam writer)
-               iioimage (IIOImage. layered nil nil)
-               ios (ImageIO/createImageOutputStream output-file)]
-           (doto write-param
-             (.setCompressionMode ImageWriteParam/MODE_EXPLICIT)
-             (.setCompressionQuality 1.0))
-           (doto writer
-             (.setOutput ios)
-             (.write nil iioimage write-param)
-             (.dispose))
-           (doto ios
-             (.close))
-           ;; (ImageIO/write layered ext output-file)
-           (>! done-chan (str "Converting file " (.getPath output-file))))))
-
-      (<!!
-       (go
-        (doseq [_ @files]
-          (swap! done-count inc))))
-      (reset! files []) ; reset files list
-      (s/config! status-text :text (str @done-count " files converted!")))))
-
-(defn convert-button []
-  (s/button :text "Convert" :listen [:action convert-files]))
-
-(defn files-selected [fc, fs]
-  (s/text! status-text (str (count fs) " files ready to be converted"))
-  (reset! files fs))
-
-(defn dnd-handler-fn [data]
-  (let [files (map (fn [path] io/file path) (:data data))]
-    (files-selected nil files)))
-
-(def dnd-handler (dnd/default-transfer-handler
-                   :import [dnd/file-list-flavor dnd-handler-fn]
-                   :export {}))
-
-
-(defn open-file-dialog []
-  (choose-file :type :open
-               :multi? true
-               :filters [["Images" (seq (ImageIO/getReaderFormatNames))]]
-               :selection-mode :files-only
-               :dir (get @prefs :dir)
-               :success-fn files-selected))
-
-(defmulti build-menuitems-for (fn [x] x))
+(defmulti build-menuitems-for identity)
 (defmethod build-menuitems-for :edit [_]
   [(s/menu-item :text "Preferences"
-                :listen [:action (fn [_]
-                                   (dandy.gui.settings/make-settings-dialog))])])
+                :listen [:action dandy.gui.settings/make-settings-dialog])])
 
-(defmulti build-menu-for (fn [x] x))
+(defmulti build-menu-for identity)
 (defmethod build-menu-for :edit [_]
   (s/menu :text "Edit" :items (build-menuitems-for :edit)))
 
 (defn build-menubar []
   (s/menubar :items [(build-menu-for :edit)]))
 
+(defn convert-button []
+  (s/button :text "Convert" :id :convert-button))
+
 (defn layout []
-  (mig-panel :constraints ["gap 5px, ins 5px" "" ""]
-             :items [[(s/button :text "Choose files"
-                                :listen [:action (fn [e] (open-file-dialog))]) ""]
-                     [status-text "skip 1, span 2, wrap"]
+  (let [panel (mig-panel :constraints ["gap 5px, ins 5px" "" ""]
+                         :items [[(s/button :text "Choose files"
+                                            :id :choose-files) ""]
+                                 [(s/label :text ""
+                                           :id :status-text) "skip 1, span 2, wrap"]])]
+    (doseq [icon (sort behaviour/icon-names)]
+      (s/add! panel
+              [(s/checkbox :text icon
+                           :id icon
+                           :class :icon-checkbox
+                           :selected? (get behaviour/to-show icon))
+               "span 2 2"])
+      (s/add! panel
+              [(s/radio :text "Top left"
+                        :id :top-left
+                        :group (get behaviour/pos-groups icon)
+                        :selected? (= :top-left (get behaviour/to-position icon)))
+               ""])
+      (s/add! panel
+              [(s/radio :text "Top right"
+                        :id :top-right
+                        :group (get behaviour/pos-groups icon)
+                        :selected? (= :top-right (get behaviour/to-position icon)))
+               "wrap"])
+      (s/add! panel
+              [(s/radio :text "Bottom left"
+                        :id :bottom-left
+                        :group (get behaviour/pos-groups icon)
+                        :selected? (= :bottom-left (get behaviour/to-position icon)))
+               "skip 1"])
+      (s/add! panel
+              [(s/radio :text "Bottom right"
+                        :id :bottom-right
+                        :group (get behaviour/pos-groups icon)
+                        :selected? (= :bottom-right (get behaviour/to-position icon)))
+               "wrap 20px"]))
 
-                     [(nth layer-cbs 0) "span 2 2"]
-                     [(s/radio :text "Top left" :id :top-left
-                               :group (:new-logo placement-map)) ""]
-                     [(s/radio :text "Top right" :id :top-right
-                               :group (:new-logo placement-map) :selected? true) "wrap"]
-                     [(s/radio :text "Bottom left" :id :bottom-left
-                               :group (:new-logo placement-map)) "skip 1"]
-                     [(s/radio :text "Bottom right" :id :bottom-right
-                               :group (:new-logo placement-map)) "wrap 20px"]
-
-                     [(nth layer-cbs 1) "span 2 2"]
-                     [(s/radio :text "Top left" :id :top-left
-                               :group (:new-price placement-map)) ""]
-                     [(s/radio :text "Top right" :id :top-right
-                               :group (:new-price placement-map) :selected? true) "wrap"]
-                     [(s/radio :text "Bottom left" :id :bottom-left
-                               :group (:new-price placement-map)) "skip 1"]
-                     [(s/radio :text "Bottom right" :id :bottom-right
-                               :group (:new-price placement-map)) "wrap 20px"]
-
-                     [(nth layer-cbs 2) "span 2 2"]
-                     [(s/radio :text "Top left" :id :top-left
-                               :group (:new placement-map)) ""]
-                     [(s/radio :text "Top right" :id :top-right
-                               :group (:new placement-map) :selected? true) "wrap"]
-                     [(s/radio :text "Bottom left" :id :bottom-left
-                               :group (:new placement-map)) "skip 1"]
-                     [(s/radio :text "Bottom right" :id :bottom-right
-                               :group (:new placement-map)) "wrap 20px"]
-
-                     [(convert-button) "skip 3"]]))
+    (s/add! panel [(convert-button) "skip 3"])
+    panel))
 
 (defn run []
   (s/invoke-later
    (-> (get (SubstanceLookAndFeel/getAllSkins) "Office Silver 2007")
        .getClassName
        SubstanceLookAndFeel/setSkin))
+
   (s/invoke-later
    (-> (s/frame
         :title "Dandy"
@@ -171,6 +80,7 @@
         :on-close :exit
         :resizable? false
         :icon (seesaw.icon/icon (io/file "assets/dandy.png"))
-        :transfer-handler dnd-handler)
+        :transfer-handler behaviour/dnd-handler)
+       behaviour/add-behaviours
        s/pack!
        s/show!)))

@@ -1,4 +1,4 @@
-(ns dandy.gui.behaviour
+(ns dandy.gui.settings-behaviour
   (:require [seesaw.core :as s]
             [seesaw.bind :as bind])
   (:use [dandy.prefs :only (prefs)]
@@ -43,7 +43,7 @@ which is fired when the selection of dandy.gui.settings/position-group changes."
 
 ; the main function that adds behaviour to UI elements
 (defn add-behaviours
-  "Adds behaviours to all the UI elements"
+  "Adds behaviours to all the settings UI elements"
   [root]
   ; finds elements under root
   (defn find-elem [id] (s/select root [id]))
