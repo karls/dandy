@@ -1,4 +1,5 @@
-(ns dandy.layer)
+(ns dandy.layer
+  (:import java.awt.RenderingHints))
 
 (defmulti compute-layer-coords (fn [_ _ pos] pos))
 
@@ -20,6 +21,10 @@
   (let [coords (compute-layer-coords base layer position)
         graphics (.createGraphics base)]
     (doto graphics
+      (.setRenderingHint RenderingHints/KEY_RENDERING
+                         RenderingHints/VALUE_RENDER_QUALITY)
+      (.setRenderingHint RenderingHints/KEY_COLOR_RENDERING
+                         RenderingHints/VALUE_COLOR_RENDER_QUALITY)
       (.drawImage layer (first coords) (second coords) nil)
       (.dispose))
     base))

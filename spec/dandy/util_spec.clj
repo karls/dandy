@@ -7,7 +7,7 @@
 (describe "path->image"
           (context "normal image file"
                    (it "returns an instance of BufferedImage"
-                       (should (instance? BufferedImage 
+                       (should (instance? BufferedImage
                                           (path->image (images "mountains.jpg"))))))
           (context "non-existent file"
                    (it "throws an exception"

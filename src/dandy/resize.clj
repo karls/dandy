@@ -1,5 +1,7 @@
 (ns dandy.resize
-  (import java.awt.image.BufferedImage))
+  (:import java.awt.image.BufferedImage)
+  (:import java.awt.RenderingHints)
+  (:import dandy.ResizeUtils))
 
 (defn scale? [bufimage]
   (let [w (.getWidth bufimage)
@@ -13,14 +15,7 @@
 (defmethod resize false [original-image] original-image)
 
 (defmethod resize true
-  [original-image] 
-  (let [ratio (/ (.getWidth original-image) 1000)
-        new-width 1000
-        new-height (int (/ (.getHeight original-image) ratio))
-        type (.getType original-image)
-        resized-image (BufferedImage. new-width new-height type)
-        graphics (.createGraphics resized-image)]
-    (doto graphics
-      (.drawImage original-image 0 0 new-width new-height nil)
-      (.dispose))
-    resized-image))
+  [original-image]
+  (ResizeUtils/getScaledInstance original-image
+                                 1000
+                                 RenderingHints/VALUE_INTERPOLATION_BILINEAR))
