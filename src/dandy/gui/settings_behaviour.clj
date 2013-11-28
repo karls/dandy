@@ -1,9 +1,13 @@
 (ns dandy.gui.settings-behaviour
   (:require [seesaw.core :as s]
+            [clojure.java.io :as io]
             [seesaw.bind :as bind])
   (:use [dandy.prefs :only (prefs)]
         [seesaw.chooser :only (choose-file)])
-  (:import java.awt.event.ItemEvent))
+  (:import java.awt.event.ItemEvent
+           javax.imageio.ImageIO
+           java.awt.RenderingHints
+           dandy.ResizeUtils))
 
 ; notification channel for when the default directory has been chosen
 (def directory-notifier (bind/notify-later))
@@ -19,6 +23,8 @@
 
 ; this is used in settings UI, but declared here to avoid cyclic deps
 (def position-group (s/button-group))
+
+(def not-nil? (complement nil?))
 
 (defn- parse-name [filepath]
   (last (clojure.string/split filepath #"\/")))
@@ -66,9 +72,21 @@ which is fired when the selection of dandy.gui.settings/position-group changes."
              (bind/property (find-elem :#icon-path) :text))
 
   (bind/bind (bind/selection (find-elem :#icon-list))
-             ; TODO: need to scale this properly
-             (bind/transform #(clojure.java.io/as-file
-                               (get-in @prefs [:icons % :path])))
+             (bind/filter nil?)
+             (bind/b-do* (fn [_] (s/selection! position-group nil))))
+
+  (bind/bind (bind/selection (find-elem :#icon-list))
+             (bind/transform #(get-in @prefs [:icons % :path]))
+             (bind/filter not-nil?)
+             (bind/transform #(ImageIO/read (clojure.java.io/file %)))
+             (bind/transform
+              #(ResizeUtils/getScaledInstance %
+                                              64
+                                              RenderingHints/VALUE_INTERPOLATION_BILINEAR))
+             (bind/property (find-elem :#icon-preview) :icon))
+
+  (bind/bind (bind/selection (find-elem :#icon-list))
+             (bind/filter nil?)
              (bind/property (find-elem :#icon-preview) :icon))
 
   (bind/bind (bind/selection (find-elem :#icon-list))
