@@ -42,8 +42,10 @@
                    :import [dnd/file-list-flavor dnd-handler-fn]
                    :export {}))
 
+(defn- icon-name [icon] (-> icon name (clojure.string/split #"\.") first))
+
 (defn- generate-filename [directory basename ext icon-ids]
-  (let [pos-ext (apply str (map (fn [p] (str "_" (name p))) icon-ids))]
+  (let [pos-ext (apply str (map (fn [p] (str "_" (icon-name p))) icon-ids))]
     (str directory "/" basename "_resized" pos-ext "." ext)))
 
 (defn- load-icon
