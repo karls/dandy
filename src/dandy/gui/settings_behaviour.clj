@@ -5,6 +5,7 @@
   (:use [dandy.prefs :only (prefs)]
         [seesaw.chooser :only (choose-file)])
   (:import java.awt.event.ItemEvent
+           java.io.File
            javax.imageio.ImageIO
            java.awt.RenderingHints
            dandy.ResizeUtils))
@@ -25,9 +26,6 @@
 (def position-group (s/button-group))
 
 (def not-nil? (complement nil?))
-
-(defn- parse-name [filepath]
-  (last (clojure.string/split filepath #"\/")))
 
 (defn- keyword->id [kw] (keyword (str "#" (name kw))))
 
@@ -134,7 +132,7 @@ which is fired when the selection of dandy.gui.settings/position-group changes."
             (fn [e]
               (if-let [path (choose-icon)]
                 (let [key (s/selection (find-elem :#icon-list))
-                      name (parse-name path)]
+                      name (.getName (File. path))]
                   (swap! prefs
                          update-in
                          [:icons]
