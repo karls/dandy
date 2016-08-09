@@ -20,7 +20,7 @@
   nil)
 
 (defn directory-label []
-  (s/label :text "Images directory"))
+  (s/label :text "Vaikimisi pildikaust"))
 
 (defn directory-text-field []
   (s/text :id :directory-field
@@ -41,7 +41,7 @@
                                             :success-fn dir-chosen))]))
 
 (defn new-logo-label []
-  (s/label :text "'Logo' image"))
+  (s/label :text "'Logo' pilt"))
 
 (defn new-logo-text-field []
   (s/text :id :new-logo-field
@@ -60,7 +60,7 @@
                                             :selection-mode :files-only
                                             :success-fn new-logo-chosen))]))
 (defn new-price-label []
-  (s/label :text "'New price' image"))
+  (s/label :text "'Uus hind' pilt"))
 
 (defn new-price-text-field []
   (s/text :id :new-price-field
@@ -79,7 +79,7 @@
                                             :selection-mode :files-only
                                             :success-fn new-price-chosen))]))
 (defn new-label []
-  (s/label :text "'New' image"))
+  (s/label :text "'Uus' pilt"))
 
 (defn new-text-field []
   (s/text :id :new-field
@@ -107,13 +107,13 @@
                      [(new-logo-text-field) "growx"]
                      [(new-logo-button) "wrap"]
 
-                     [(new-price-label) "align right"]
-                     [(new-price-text-field) "growx"]
-                     [(new-price-button) "wrap"]
-
                      [(new-label) "align right"]
                      [(new-text-field) "growx"]
-                     [(new-button) ""]]))
+                     [(new-button) "wrap"]
+
+                     [(new-price-label) "align right"]
+                     [(new-price-text-field) "growx"]
+                     [(new-price-button) "wrap"]]))
 
 (defn add-behaviours [root]
   (bind/bind directory-notifier
