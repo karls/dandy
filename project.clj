@@ -1,4 +1,4 @@
-(defproject dandy "0.3.0"
+(defproject dandy "0.4.0"
   :description "Watermarking tool"
   :url "https://github.com/karls/dandy"
   :license {:name "Eclipse Public License"
